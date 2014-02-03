@@ -10,7 +10,12 @@ module Sentry
     def encrypt(data, key = nil)
       key = check_for_key!(key)
       des = encryptor
-      des.encrypt(key)
+      if @algorithm == @@default_algorithm
+        des.encrypt
+        des.pkcs5_keyivgen(key)
+      else
+        des.encrypt(key)  
+      end  
       data = des.update(data)
       data << des.final
     end
@@ -22,7 +27,12 @@ module Sentry
     def decrypt(data, key = nil)
       key = check_for_key!(key)
       des = encryptor
-      des.decrypt(key)
+      if @algorithm == @@default_algorithm
+        des.decrypt
+        des.pkcs5_keyivgen(key)
+      else
+        des.decrypt(key)  
+      end
       text = des.update(data)
       text << des.final
     end
@@ -75,5 +85,6 @@ module Sentry
       raise Sentry::NoKeyError if valid_key.nil?
       valid_key
     end
+   
   end
 end
